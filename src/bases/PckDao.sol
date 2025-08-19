@@ -187,6 +187,11 @@ abstract contract PckDao is DaoBase, SigVerifyBase {
         bytes calldata cert
     ) external pckCACheck(ca) returns (bytes32 attestationId) {
         (bytes16 qeidBytes, bytes2 pceidBytes,,, bytes18 tcbmBytes) = _parseStringInputs(qeid, pceid, "", "", tcbm);
+
+        attestationId = upsertPckCertBytesPart(ca, qeidBytes, pceidBytes, tcbmBytes, cert);
+    }
+
+    function upsertPckCertBytesPart(CA ca, bytes16 qeidBytes, bytes2 pceidBytes, bytes18 tcbmBytes, bytes calldata cert) private returns (bytes32 attestationId) {
         (bytes32 hash, bytes32 key, X509CertObj memory pck) = _validatePck(ca, cert, qeidBytes, pceidBytes, tcbmBytes);
 
         // attest timestamp

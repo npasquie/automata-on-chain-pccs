@@ -211,7 +211,18 @@ abstract contract FmspcTcbDao is DaoBase, SigVerifyBase {
 
         TCBLevelsObj[] memory tcbLevels = FmspcTcbLib.parseTcbLevels(tcbInfo.version, tcbLevelsString);
         bytes memory encodedTcbLevels = _encodeTcbLevels(tcbLevels);
-        if (tcbInfo.version < 3) {
+
+        reqData = getReqData(tcbInfo, encodedTcbLevels, tcbInfoObj, tdxModuleString, tdxModuleIdentitiesString);
+
+        contentHash = FmspcTcbLib.generateFmspcTcbContentHash(
+            tcbInfo, tcbLevelsString, tdxModuleString, tdxModuleIdentitiesString
+        );
+    }
+
+
+    function getReqData(TcbInfoBasic memory tcbInfo, bytes memory encodedTcbLevels, TcbInfoJsonObj calldata tcbInfoObj, string memory tdxModuleString,
+        string memory tdxModuleIdentitiesString) private view returns(bytes memory reqData){
+         if (tcbInfo.version < 3) {
             reqData = abi.encode(tcbInfo, encodedTcbLevels, tcbInfoObj);
         } else {
             TDXModule memory module;
@@ -223,10 +234,6 @@ abstract contract FmspcTcbDao is DaoBase, SigVerifyBase {
             }
             reqData = abi.encode(tcbInfo, module, encodedModuleIdentities, encodedTcbLevels, tcbInfoObj);
         }
-
-        contentHash = FmspcTcbLib.generateFmspcTcbContentHash(
-            tcbInfo, tcbLevelsString, tdxModuleString, tdxModuleIdentitiesString
-        );
     }
 
     function _validateTcbInfo(TcbInfoJsonObj calldata tcbInfoObj) private view {
